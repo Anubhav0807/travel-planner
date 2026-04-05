@@ -24,21 +24,149 @@ export default function InsightsPage() {
     }
   }
 
-  // Simple markdown-like rendering (bold, headers, lists)
+  // Markdown-like rendering (bold, headers, lists)
   function renderInsightsText(text) {
     if (!text) return null;
+
     const lines = text.split('\n');
-    return lines.map((line, i) => {
-      if (line.startsWith('### ')) return <h3 key={i}>{line.slice(4)}</h3>;
-      if (line.startsWith('## ')) return <h2 key={i}>{line.slice(3)}</h2>;
-      if (line.startsWith('# ')) return <h1 key={i}>{line.slice(2)}</h1>;
-      if (line.startsWith('- ') || line.startsWith('* ')) return <li key={i}>{line.slice(2)}</li>;
-      if (line.match(/^\d+\. /)) return <li key={i}>{line.replace(/^\d+\. /, '')}</li>;
-      if (line.trim() === '') return <br key={i} />;
-      // Bold markdown
-      const bolded = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      return <p key={i} dangerouslySetInnerHTML={{ __html: bolded }} />;
+    const elements = [];
+
+    let listBuffer = [];
+    let listType = null; // 'ul' or 'ol'
+
+    const flushList = (key) => {
+      if (listBuffer.length === 0) return null;
+
+      const ListTag = listType === 'ol' ? 'ol' : 'ul';
+      const el = (
+        <ListTag key={key}>
+          {listBuffer.map((item, i) => (
+            <li key={i}>{parseInline(item)}</li>
+          ))}
+        </ListTag>
+      );
+
+      listBuffer = [];
+      listType = null;
+      return el;
+    };
+
+    const parseInline = (line) => {
+      if (!line) return line;
+
+      let parts = [];
+      let remaining = line;
+
+      // Handle bold (**text** or __text__)
+      const boldRegex = /(\*\*|__)(.*?)\1/;
+
+      while (remaining.length > 0) {
+        const match = remaining.match(boldRegex);
+
+        if (!match) {
+          parts.push(cleanText(remaining));
+          break;
+        }
+
+        const [full, , content] = match;
+        const index = match.index;
+
+        if (index > 0) {
+          parts.push(cleanText(remaining.slice(0, index)));
+        }
+
+        parts.push(<strong key={parts.length}>{cleanText(content)}</strong>);
+        remaining = remaining.slice(index + full.length);
+      }
+
+      return parts;
+    };
+
+    const cleanText = (text) => {
+      return text
+        .replace(/\*/g, '') // remove stray *
+        .replace(/_/g, '')  // remove stray _
+        .trim();
+    };
+
+    lines.forEach((line, i) => {
+      const trimmed = line.trim();
+
+      // Headings
+      if (trimmed.startsWith('### ')) {
+        elements.push(flushList(i));
+        elements.push(<h3 key={i}>{parseInline(trimmed.slice(4))}</h3>);
+        return;
+      }
+
+      if (trimmed.startsWith('## ')) {
+        elements.push(flushList(i));
+        elements.push(<h2 key={i}>{parseInline(trimmed.slice(3))}</h2>);
+        return;
+      }
+
+      if (trimmed.startsWith('# ')) {
+        elements.push(flushList(i));
+        elements.push(<h1 key={i}>{parseInline(trimmed.slice(2))}</h1>);
+        return;
+      }
+
+      // Unordered List
+      if (/^[-*] /.test(trimmed)) {
+        if (listType !== 'ul') {
+          elements.push(flushList(i));
+          listType = 'ul';
+        }
+        listBuffer.push(trimmed.slice(2));
+        return;
+      }
+
+      // Ordered List
+      if (/^\d+\. /.test(trimmed)) {
+        if (listType !== 'ol') {
+          elements.push(flushList(i));
+          listType = 'ol';
+        }
+        listBuffer.push(trimmed.replace(/^\d+\. /, ''));
+        return;
+      }
+
+      // Empty Line
+      if (trimmed === '') {
+        elements.push(flushList(i));
+        elements.push(<br key={i} />);
+        return;
+      }
+
+      // Horizontal Rule (--- or ***)
+      if (/^(-{3,}|\*{3,})$/.test(trimmed)) {
+        elements.push(flushList(i));
+        elements.push(
+          <hr
+            key={i}
+            style={{
+              border: 'none',
+              borderTop: '1px solid #ccc',
+              marginVertical: 12,
+            }}
+          />
+        );
+        return;
+      }
+
+      // Normal Paragraph
+      elements.push(flushList(i));
+      elements.push(
+        <p key={i}>
+          {parseInline(trimmed)}
+        </p>
+      );
     });
+
+    // Flush any remaining list
+    elements.push(flushList('end'));
+
+    return elements;
   }
 
   return (
@@ -63,7 +191,7 @@ export default function InsightsPage() {
       {loading && (
         <div className="loading">
           <div className="spinner" />
-          <p>Gemini is analyzing your travel data…</p>
+          <p>Gemini is analyzing the travel data…</p>
         </div>
       )}
 

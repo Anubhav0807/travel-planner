@@ -9,7 +9,7 @@ from app.services.analytics_service import (
 
 # Configure Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
+GEMINI_MODEL = "gemini-2.5-flash"
 
 def generate_insights(prompt=None):
     """Generate AI-powered planning insights using travel data and Gemini."""
@@ -52,18 +52,17 @@ Format your response with clear sections and bullet points."""
         user_prompt += f"\n\nAdditional focus area requested by scientist:\n{prompt}"
 
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel(GEMINI_MODEL)
         response = model.generate_content(
             f"{system_prompt}\n\n{user_prompt}",
             generation_config=genai.types.GenerationConfig(
-                max_output_tokens=2048,
                 temperature=0.7,
             ),
         )
         return {
             "insights": response.text,
             "data_summary": summary,
-            "model": "gemini-1.5-flash",
+            "model": GEMINI_MODEL,
         }
     except Exception as e:
         raise RuntimeError(f"Failed to generate insights: {str(e)}")
