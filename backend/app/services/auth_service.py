@@ -35,11 +35,11 @@ def login_user(email, password):
 
 def refresh_access_token(user_id):
     """Create a new access token from a refresh token."""
-    return create_access_token(identity=user_id)
+    return create_access_token(identity=str(user_id))
 
 
 def _create_tokens(user_id):
     return {
-        "access_token": create_access_token(identity=user_id),
-        "refresh_token": create_refresh_token(identity=user_id),
+        "access_token": create_access_token(identity=str(user_id)),
+        "refresh_token": create_refresh_token(identity=str(user_id)),
     }

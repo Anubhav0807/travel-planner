@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Alert, Dimensions,
 } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { getCurrentLocation, getAddressFromCoords, calculateDistance } from '../services/locationService';
@@ -13,16 +13,20 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
   const mapRef = useRef(null);
+
   const [currentLocation, setCurrentLocation] = useState(null);
   const [tracking, setTracking] = useState(false);
   const [tripStart, setTripStart] = useState(null);
   const [elapsed, setElapsed] = useState(0);
 
+  const [path, setPath] = useState([]);
+  const [distance, setDistance] = useState(0);
+
   useEffect(() => {
     fetchLocation();
   }, []);
 
-  // Timer for active trip
+  // Timer
   useEffect(() => {
     let interval;
     if (tracking && tripStart) {
@@ -33,10 +37,59 @@ export default function HomeScreen({ navigation }) {
     return () => clearInterval(interval);
   }, [tracking, tripStart]);
 
+  // Location Tracking Loop
+  useEffect(() => {
+    let interval;
+
+    if (tracking) {
+      interval = setInterval(async () => {
+        try {
+          const loc = await getCurrentLocation();
+
+          const newPoint = {
+            latitude: loc.lat,
+            longitude: loc.lng,
+          };
+
+          setPath((prevPath) => {
+            if (prevPath.length > 0) {
+              const last = prevPath[prevPath.length - 1];
+
+              const d = calculateDistance(
+                last.latitude,
+                last.longitude,
+                newPoint.latitude,
+                newPoint.longitude
+              );
+
+              // Ignore GPS noise (<10 meters)
+              if (d < 0.01) return prevPath;
+
+              setDistance((prev) => prev + d);
+            }
+
+            // Smooth camera follow
+            mapRef.current?.animateCamera({
+              center: newPoint,
+            });
+
+            return [...prevPath, newPoint];
+          });
+
+        } catch (err) {
+          console.log('Tracking error:', err);
+        }
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [tracking]);
+
   async function fetchLocation() {
     try {
       const loc = await getCurrentLocation();
       setCurrentLocation(loc);
+
       if (mapRef.current) {
         mapRef.current.animateToRegion({
           latitude: loc.lat,
@@ -54,9 +107,14 @@ export default function HomeScreen({ navigation }) {
     try {
       const loc = await getCurrentLocation();
       const address = await getAddressFromCoords(loc.lat, loc.lng);
+
       setTripStart({ ...loc, address, time: Date.now() });
       setTracking(true);
       setElapsed(0);
+
+      setPath([{ latitude: loc.lat, longitude: loc.lng }]);
+      setDistance(0);
+
     } catch (err) {
       Alert.alert('Error', 'Could not get your location. Please check permissions.');
     }
@@ -66,21 +124,40 @@ export default function HomeScreen({ navigation }) {
     try {
       const loc = await getCurrentLocation();
       const address = await getAddressFromCoords(loc.lat, loc.lng);
-      const distance = calculateDistance(tripStart.lat, tripStart.lng, loc.lat, loc.lng);
 
       setTracking(false);
 
       navigation.navigate('NewTrip', {
-        origin: { lat: tripStart.lat, lng: tripStart.lng, address: tripStart.address },
-        destination: { lat: loc.lat, lng: loc.lng, address },
+        origin: {
+          lat: tripStart.lat,
+          lng: tripStart.lng,
+          address: tripStart.address,
+        },
+        destination: {
+          lat: loc.lat,
+          lng: loc.lng,
+          address,
+        },
         startTime: new Date(tripStart.time).toISOString(),
         endTime: new Date().toISOString(),
         distance,
+        path,     // Optional: full path for future use
       });
+
+      resetTripState();
+
     } catch (err) {
       Alert.alert('Error', 'Could not get destination location.');
       setTracking(false);
     }
+  }
+
+  function resetTripState() {
+    setTracking(false);
+    setTripStart(null);
+    setElapsed(0);
+    setPath([]);
+    setDistance(0);
   }
 
   function formatElapsed(secs) {
@@ -112,11 +189,29 @@ export default function HomeScreen({ navigation }) {
             pinColor={COLORS.success}
           />
         )}
+
+        {!tracking && path.length > 0 && (
+          <Marker
+            coordinate={path[path.length - 1]}
+            title="Trip End"
+          />
+        )}
+
+        {path.length > 1 && (
+          <Polyline
+            coordinates={path}
+            strokeWidth={4}
+            strokeColor={COLORS.accent}
+          />
+        )}
       </MapView>
 
-      {/* Greeting card */}
+      {/* Greeting */}
       <View style={styles.greetingCard}>
-        <Text style={styles.greeting}>Hello, {user?.name?.split(' ')[0] || 'Traveller'} 👋</Text>
+        <Text style={styles.greeting}>
+          Hello, {user?.name?.split(' ')[0] || 'Traveller'}{' '}
+          <Ionicons name="hand-left-outline" size={20} color={COLORS.text} />
+        </Text>
         <Text style={styles.greetingSub}>Ready to record your trip?</Text>
       </View>
 
@@ -127,11 +222,18 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.trackingInfo}>
               <View style={styles.pulsingDot} />
               <Text style={styles.trackingText}>Recording trip…</Text>
-              <Text style={styles.timerText}>{formatElapsed(elapsed)}</Text>
+
+              {/* Timer + Distance */}
+              <Text style={styles.timerText}>
+                {formatElapsed(elapsed)} • {distance.toFixed(2)} km
+              </Text>
             </View>
+
             <Text style={styles.originText}>
-              From: {tripStart?.address || `${tripStart?.lat?.toFixed(4)}, ${tripStart?.lng?.toFixed(4)}`}
+              From: {tripStart?.address ||
+                `${tripStart?.lat?.toFixed(4)}, ${tripStart?.lng?.toFixed(4)}`}
             </Text>
+
             <TouchableOpacity style={styles.stopButton} onPress={stopTrip}>
               <Ionicons name="stop-circle" size={24} color={COLORS.white} />
               <Text style={styles.stopButtonText}>End Trip</Text>
@@ -143,6 +245,7 @@ export default function HomeScreen({ navigation }) {
               <Ionicons name="navigate" size={24} color={COLORS.white} />
               <Text style={styles.startButtonText}>Start Trip</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.manualButton}
               onPress={() => navigation.navigate('NewTrip', {})}

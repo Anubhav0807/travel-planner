@@ -55,7 +55,7 @@ def create_app(testing=False):
 
     @jwt.user_identity_loader
     def user_identity_lookup(user):
-        return user if isinstance(user, int) else user.id
+        return user if isinstance(user, str) else user.id
 
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data):

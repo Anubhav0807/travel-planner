@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { IoMap } from 'react-icons/io5';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
@@ -28,7 +29,7 @@ export default function LoginPage() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-brand">
-          <div className="login-brand-icon">🗺️</div>
+          <div className="login-brand-icon"><IoMap /></div>
           <h2>NATPAC Dashboard</h2>
           <p>Travel Data Analytics Platform</p>
         </div>

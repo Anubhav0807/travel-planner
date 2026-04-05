@@ -88,7 +88,7 @@ export default function NewTripScreen({ route, navigation }) {
         cost: parseFloat(cost) || 0,
         client_id: generateClientId(),
       });
-      Alert.alert('Success! 📍', 'Your trip has been recorded.', [
+      Alert.alert('Success!', 'Your trip has been recorded.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (err) {
@@ -111,6 +111,14 @@ export default function NewTripScreen({ route, navigation }) {
             ]}
             onPress={() => onSelect(opt.value)}
           >
+            {opt.icon && (
+              <Ionicons
+                name={opt.icon}
+                size={16}
+                color={selected === opt.value ? COLORS.white : COLORS.textSecondary}
+                style={{ marginRight: 4 }}
+              />
+            )}
             <Text style={[
               styles.optionChipText,
               selected === opt.value && styles.optionChipTextSelected,
@@ -125,27 +133,42 @@ export default function NewTripScreen({ route, navigation }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.sectionTitle}>📍 Origin</Text>
+      <View style={styles.sectionHeader}>
+        <Ionicons name="location-outline" size={18} color={COLORS.primary} />
+        <Text style={styles.sectionTitle}>Origin</Text>
+      </View>
       <View style={styles.row}>
         <TextInput style={[styles.input, styles.halfInput]} placeholder="Latitude" placeholderTextColor={COLORS.textLight} value={originLat} onChangeText={setOriginLat} keyboardType="numeric" />
         <TextInput style={[styles.input, styles.halfInput]} placeholder="Longitude" placeholderTextColor={COLORS.textLight} value={originLng} onChangeText={setOriginLng} keyboardType="numeric" />
       </View>
       <TextInput style={styles.input} placeholder="Origin address (auto-filled)" placeholderTextColor={COLORS.textLight} value={originAddress} onChangeText={setOriginAddress} />
 
-      <Text style={styles.sectionTitle}>📍 Destination</Text>
+      <View style={styles.sectionHeader}>
+        <Ionicons name="location-outline" size={18} color={COLORS.primary} />
+        <Text style={styles.sectionTitle}>Destination</Text>
+      </View>
       <View style={styles.row}>
         <TextInput style={[styles.input, styles.halfInput]} placeholder="Latitude" placeholderTextColor={COLORS.textLight} value={destLat} onChangeText={setDestLat} keyboardType="numeric" />
         <TextInput style={[styles.input, styles.halfInput]} placeholder="Longitude" placeholderTextColor={COLORS.textLight} value={destLng} onChangeText={setDestLng} keyboardType="numeric" />
       </View>
       <TextInput style={styles.input} placeholder="Destination address" placeholderTextColor={COLORS.textLight} value={destAddress} onChangeText={setDestAddress} />
 
-      <Text style={styles.sectionTitle}>🚌 Travel Mode</Text>
+      <View style={styles.sectionHeader}>
+        <Ionicons name="bus-outline" size={18} color={COLORS.primary} />
+        <Text style={styles.sectionTitle}>Travel Mode</Text>
+      </View>
       <OptionGrid options={TRAVEL_MODES} selected={mode} onSelect={setMode} />
 
-      <Text style={styles.sectionTitle}>🎯 Trip Purpose</Text>
+      <View style={styles.sectionHeader}>
+        <Ionicons name="flag-outline" size={18} color={COLORS.primary} />
+        <Text style={styles.sectionTitle}>Trip Purpose</Text>
+      </View>
       <OptionGrid options={TRIP_PURPOSES} selected={purpose} onSelect={setPurpose} />
 
-      <Text style={styles.sectionTitle}>📊 Trip Details</Text>
+      <View style={styles.sectionHeader}>
+        <Ionicons name="analytics-outline" size={18} color={COLORS.primary} />
+        <Text style={styles.sectionTitle}>Trip Details</Text>
+      </View>
       <View style={styles.row}>
         <View style={[styles.inputContainer, styles.halfInput]}>
           <Text style={styles.inputLabel}>Distance (km)</Text>
@@ -196,12 +219,17 @@ export default function NewTripScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { padding: 20, paddingTop: 16 },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 24,
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
     color: COLORS.text,
-    marginTop: 20,
-    marginBottom: 10,
   },
   input: {
     backgroundColor: COLORS.white,
@@ -235,6 +263,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1.5,
     borderColor: COLORS.border,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   optionChipSelected: {
     backgroundColor: COLORS.primary,

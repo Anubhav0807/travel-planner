@@ -34,44 +34,81 @@ export function formatDistance(km) {
  */
 export function formatCost(amount) {
   if (!amount || amount === 0) return 'Free';
-  return `₹${amount.toFixed(0)}`;
+  return `\u20B9${amount.toFixed(0)}`;
 }
 
 /**
- * Get label for a mode value
+ * Get label for a mode value (plain text, no emoji)
  */
 export function getModeLabel(value) {
   const modes = {
-    walk: '🚶 Walk',
-    bicycle: '🚲 Bicycle',
-    two_wheeler: '🛵 Two Wheeler',
-    auto_rickshaw: '🛺 Auto Rickshaw',
-    car: '🚗 Car',
-    taxi: '🚕 Taxi',
-    bus: '🚌 Bus',
-    metro: '🚇 Metro',
-    train: '🚆 Train',
-    other: '🔄 Other',
+    walk: 'Walk',
+    bicycle: 'Bicycle',
+    two_wheeler: 'Two Wheeler',
+    auto_rickshaw: 'Auto Rickshaw',
+    car: 'Car',
+    taxi: 'Taxi',
+    bus: 'Bus',
+    metro: 'Metro',
+    train: 'Train',
+    other: 'Other',
   };
   return modes[value] || value;
 }
 
 /**
- * Get label for a purpose value
+ * Get Ionicon name for a mode value
+ */
+export function getModeIcon(value) {
+  const icons = {
+    walk: 'walk-outline',
+    bicycle: 'bicycle-outline',
+    two_wheeler: 'bicycle-outline',
+    auto_rickshaw: 'car-outline',
+    car: 'car-sport-outline',
+    taxi: 'car-outline',
+    bus: 'bus-outline',
+    metro: 'subway-outline',
+    train: 'train-outline',
+    other: 'swap-horizontal-outline',
+  };
+  return icons[value] || 'help-circle-outline';
+}
+
+/**
+ * Get label for a purpose value (plain text, no emoji)
  */
 export function getPurposeLabel(value) {
   const purposes = {
-    work: '💼 Work',
-    education: '🎓 Education',
-    shopping: '🛍️ Shopping',
-    recreation: '🎭 Recreation',
-    medical: '🏥 Medical',
-    social: '👥 Social',
-    religious: '🛕 Religious',
-    personal_business: '📋 Personal Business',
-    other: '🔄 Other',
+    work: 'Work',
+    education: 'Education',
+    shopping: 'Shopping',
+    recreation: 'Recreation',
+    medical: 'Medical',
+    social: 'Social',
+    religious: 'Religious',
+    personal_business: 'Personal Business',
+    other: 'Other',
   };
   return purposes[value] || value;
+}
+
+/**
+ * Get Ionicon name for a purpose value
+ */
+export function getPurposeIcon(value) {
+  const icons = {
+    work: 'briefcase-outline',
+    education: 'school-outline',
+    shopping: 'cart-outline',
+    recreation: 'game-controller-outline',
+    medical: 'medkit-outline',
+    social: 'people-outline',
+    religious: 'home-outline',
+    personal_business: 'clipboard-outline',
+    other: 'swap-horizontal-outline',
+  };
+  return icons[value] || 'help-circle-outline';
 }
 
 /**

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import api from '../api';
-import { TRAVEL_MODES, TRIP_PURPOSES } from '../utils/constants';
+import { TRAVEL_MODES, TRIP_PURPOSES, IONICON_COMPONENTS } from '../utils/constants';
 
 export default function TripsPage() {
   const [trips, setTrips] = useState([]);
@@ -88,8 +88,18 @@ export default function TripsPage() {
                   </td>
                   <td>{formatDate(trip.start_time)}</td>
                   <td>{formatTime(trip.start_time)}</td>
-                  <td><span className="tag">{trip.mode?.replace('_', ' ')}</span></td>
-                  <td><span className="tag">{trip.purpose?.replace('_', ' ')}</span></td>
+                  <td>
+                    <span className="tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {(() => { const m = TRAVEL_MODES.find(x => x.value === trip.mode); const Icon = m ? IONICON_COMPONENTS[m.icon] : null; return Icon ? <Icon style={{ fontSize: 14 }} /> : null; })()}
+                      {trip.mode?.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {(() => { const p = TRIP_PURPOSES.find(x => x.value === trip.purpose); const Icon = p ? IONICON_COMPONENTS[p.icon] : null; return Icon ? <Icon style={{ fontSize: 14 }} /> : null; })()}
+                      {trip.purpose?.replace('_', ' ')}
+                    </span>
+                  </td>
                   <td style={{ fontWeight: 600, color: '#3E92CC' }}>{trip.distance} km</td>
                   <td style={{ fontWeight: 600, color: '#059669' }}>{trip.cost > 0 ? `₹${trip.cost}` : 'Free'}</td>
                   <td style={{ textAlign: 'center' }}>{trip.companions}</td>

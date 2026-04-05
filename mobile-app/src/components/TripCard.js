@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../utils/constants';
-import { formatDate, formatTime, formatDistance, formatCost, getModeLabel, getPurposeLabel } from '../utils/helpers';
+import { formatDate, formatTime, formatDistance, formatCost, getModeLabel, getPurposeLabel, getModeIcon, getPurposeIcon } from '../utils/helpers';
 
 export default function TripCard({ trip, onPress }) {
   return (
@@ -38,9 +38,11 @@ export default function TripCard({ trip, onPress }) {
 
       <View style={styles.footer}>
         <View style={styles.tag}>
+          <Ionicons name={getModeIcon(trip.mode)} size={12} color={COLORS.textSecondary} />
           <Text style={styles.tagText}>{getModeLabel(trip.mode)}</Text>
         </View>
         <View style={styles.tag}>
+          <Ionicons name={getPurposeIcon(trip.purpose)} size={12} color={COLORS.textSecondary} />
           <Text style={styles.tagText}>{getPurposeLabel(trip.purpose)}</Text>
         </View>
         <Text style={styles.distanceText}>{formatDistance(trip.distance)}</Text>
@@ -140,6 +142,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   tagText: {
     fontSize: 11,

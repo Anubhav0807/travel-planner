@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { IoSparkles, IoHourglass } from 'react-icons/io5';
 import Header from '../components/Header';
 import api from '../api';
 
@@ -52,8 +53,8 @@ export default function InsightsPage() {
           onChange={e => setPrompt(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleGenerate()}
         />
-        <button className="btn btn-primary" onClick={handleGenerate} disabled={loading}>
-          {loading ? '⏳ Generating...' : '🤖 Generate Insights'}
+        <button className="btn btn-primary" onClick={handleGenerate} disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          {loading ? <><IoHourglass /> Generating...</> : <><IoSparkles /> Generate Insights</>}
         </button>
       </div>
 
@@ -93,7 +94,7 @@ export default function InsightsPage() {
 
       {!insights && !loading && (
         <div className="card" style={{ textAlign: 'center', padding: 60, color: '#94A3B8' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🤖</div>
+          <div style={{ fontSize: 48, marginBottom: 16, display: 'flex', justifyContent: 'center' }}><IoSparkles /></div>
           <h3 style={{ color: '#1E293B', marginBottom: 8 }}>Generate AI Insights</h3>
           <p>Click the button above to analyze your travel data using Google Gemini AI</p>
         </div>

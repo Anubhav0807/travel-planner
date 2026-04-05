@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../utils/constants';
-import { formatDate, formatTime, formatDistance, formatCost, getModeLabel, getPurposeLabel } from '../utils/helpers';
+import { formatDate, formatTime, formatDistance, formatCost, getModeLabel, getPurposeLabel, getModeIcon, getPurposeIcon } from '../utils/helpers';
 
 const { width } = Dimensions.get('window');
 
@@ -72,8 +72,8 @@ export default function TripDetailScreen({ route }) {
 
         {/* Details grid */}
         <View style={styles.detailsGrid}>
-          <DetailItem icon="speedometer-outline" label="Mode" value={getModeLabel(trip.mode)} />
-          <DetailItem icon="flag-outline" label="Purpose" value={getPurposeLabel(trip.purpose)} />
+          <DetailItem icon={getModeIcon(trip.mode)} label="Mode" value={getModeLabel(trip.mode)} />
+          <DetailItem icon={getPurposeIcon(trip.purpose)} label="Purpose" value={getPurposeLabel(trip.purpose)} />
           <DetailItem icon="map-outline" label="Distance" value={formatDistance(trip.distance)} />
           <DetailItem icon="cash-outline" label="Cost" value={formatCost(trip.cost)} />
           <DetailItem icon="people-outline" label="Companions" value={String(trip.companions)} />

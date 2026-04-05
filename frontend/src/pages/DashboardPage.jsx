@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { IoBarChart, IoPeople, IoResize, IoMap, IoWallet } from 'react-icons/io5';
 import Header from '../components/Header';
 import api from '../api';
 
@@ -36,11 +37,11 @@ export default function DashboardPage() {
   }
 
   const stats = [
-    { label: 'Total Trips', value: summary?.total_trips?.toLocaleString() || '0', icon: '📊', color: '#3E92CC' },
-    { label: 'Active Users', value: summary?.total_users?.toLocaleString() || '0', icon: '👥', color: '#059669' },
-    { label: 'Avg Distance', value: `${summary?.avg_distance_km || 0} km`, icon: '📏', color: '#F59E0B' },
-    { label: 'Total Distance', value: `${summary?.total_distance_km || 0} km`, icon: '🗺️', color: '#8B5CF6' },
-    { label: 'Avg Cost', value: `₹${summary?.avg_cost_inr || 0}`, icon: '💰', color: '#EF4444' },
+    { label: 'Total Trips', value: summary?.total_trips?.toLocaleString() || '0', icon: <IoBarChart />, color: '#3E92CC' },
+    { label: 'Active Users', value: summary?.total_users?.toLocaleString() || '0', icon: <IoPeople />, color: '#059669' },
+    { label: 'Avg Distance', value: `${summary?.avg_distance_km || 0} km`, icon: <IoResize />, color: '#F59E0B' },
+    { label: 'Total Distance', value: `${summary?.total_distance_km || 0} km`, icon: <IoMap />, color: '#8B5CF6' },
+    { label: 'Avg Cost', value: `\u20B9${summary?.avg_cost_inr || 0}`, icon: <IoWallet />, color: '#EF4444' },
   ];
 
   return (
